@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: pcos-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: pcos-care-connect
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - pcos-network
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: pcos-app
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/pcos-care-connect
+      JWT_SECRET: your-secret-key-change-this
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    networks:
+      - pcos-network
+    restart: unless-stopped
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  mongodb_data:
+
+networks:
+  pcos-network:
+    driver: bridge

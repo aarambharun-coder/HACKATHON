@@ -1,0 +1,71 @@
+export const INDIAN_STATES = [
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+];
+
+export const CITIES_BY_STATE = {
+  Maharashtra: ['Mumbai', 'Pune', 'Nagpur', 'Aurangabad', 'Kolhapur'],
+  Karnataka: ['Bangalore', 'Mysore', 'Mangalore', 'Belgaum', 'Hubli'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Trichy'],
+  'Uttar Pradesh': ['Lucknow', 'Kanpur', 'Varanasi', 'Agra', 'Meerut'],
+  Delhi: ['New Delhi', 'Central Delhi', 'South Delhi', 'East Delhi', 'West Delhi'],
+  Gujarat: ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Jamnagar'],
+  Haryana: ['Gurgaon', 'Noida', 'Hisar', 'Rohtak', 'Ambala'],
+  Punjab: ['Chandigarh', 'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala'],
+  Rajasthan: ['Jaipur', 'Jodhpur', 'Udaipur', 'Kota', 'Bikaner'],
+  'Andhra Pradesh': ['Hyderabad', 'Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati'],
+};
+
+export const SPECIALTIES = [
+  'Gynecology',
+  'Endocrinology',
+  'Nutrition',
+  'Fitness & Wellness',
+  'Cardiology',
+  'Dermatology',
+  'Mental Health',
+  'General Medicine',
+];
+
+export const USER_ROLES = ['patient', 'doctor', 'hospital_admin', 'super_admin'];
+
+export const SYMPTOMS = [
+  'Irregular Periods',
+  'Heavy Bleeding',
+  'Hair Loss',
+  'Hair Growth',
+  'Acne',
+  'Weight Gain',
+  'Weight Loss',
+  'Fatigue',
+  'Mood Swings',
+  'Infertility',
+  'Skin Darkening',
+  'Pelvic Pain',
+];
