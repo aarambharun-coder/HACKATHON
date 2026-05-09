@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import User from '@/models/User';
-import { hashPassword, comparePassword } from '@/lib/password';
+import { hashPassword } from '@/lib/password';
 import { generateToken } from '@/lib/auth';
 
 export async function POST(req) {
@@ -10,7 +10,7 @@ export async function POST(req) {
 
     const { email, password, name, role = 'patient', phone, gender, state, city } = await req.json();
 
-    // Validation
+    // Basic validation
     if (!email || !password || !name) {
       return NextResponse.json(
         { message: 'Please provide email, password, and name' },
@@ -25,11 +25,13 @@ export async function POST(req) {
       );
     }
 
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return NextResponse.json(
-        { message: 'User already exists with this email' },
+        { message: 'An account with this email already exists. Please sign in.' },
         { status: 409 }
       );
     }
@@ -37,44 +39,61 @@ export async function POST(req) {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create user
-    const user = await User.create({
-      name,
-      email,
+    // Create user — only pass defined fields
+    const userData = {
+      name: name.trim(),
+      email: normalizedEmail,
       password: hashedPassword,
       role,
-      phone,
-      gender,
-      state,
-      city,
-    });
+    };
+    if (phone)  userData.phone  = phone.trim();
+    if (gender) userData.gender = gender;
+    if (state)  userData.state  = state.trim();
+    if (city)   userData.city   = city.trim();
+
+    const user = await User.create(userData);
 
     // Generate token
     const token = generateToken({ userId: user._id, role: user.role });
 
-    // Return user data (without password)
-    const userResponse = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phone: user.phone,
-      state: user.state,
-      city: user.city,
-    };
-
     return NextResponse.json(
       {
-        message: 'User registered successfully',
+        message: 'Account created successfully! Please sign in.',
         token,
-        user: userResponse,
+        user: {
+          _id:   user._id,
+          name:  user.name,
+          email: user.email,
+          role:  user.role,
+          phone: user.phone,
+          state: user.state,
+          city:  user.city,
+        },
       },
       { status: 201 }
     );
   } catch (error) {
     console.error('Registration error:', error);
+
+    // Handle MongoDB duplicate key error
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { message: 'An account with this email already exists. Please sign in.' },
+        { status: 409 }
+      );
+    }
+
+    // Handle Mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(e => e.message).join(', ');
+      return NextResponse.json(
+        { message: messages },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { message: 'Registration failed', error: error.message },
+      { message: 'Registration failed. Please try again.' },
       { status: 500 }
     );
   }

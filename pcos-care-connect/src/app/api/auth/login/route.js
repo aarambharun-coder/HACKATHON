@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import User from '@/models/User';
 import { comparePassword } from '@/lib/password';
@@ -10,7 +10,6 @@ export async function POST(req) {
 
     const { email, password } = await req.json();
 
-    // Validation
     if (!email || !password) {
       return NextResponse.json(
         { message: 'Please provide email and password' },
@@ -18,8 +17,10 @@ export async function POST(req) {
       );
     }
 
-    // Find user
-    const user = await User.findOne({ email }).select('+password');
+    // Normalise email before lookup
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
     if (!user) {
       return NextResponse.json(
@@ -28,7 +29,6 @@ export async function POST(req) {
       );
     }
 
-    // Check password
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
@@ -38,37 +38,32 @@ export async function POST(req) {
       );
     }
 
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    // Update last login (non-blocking)
+    User.findByIdAndUpdate(user._id, { lastLogin: new Date() }).catch(() => {});
 
-    // Generate token
     const token = generateToken({ userId: user._id, role: user.role });
-
-    // Return user data (without password)
-    const userResponse = {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      phone: user.phone,
-      state: user.state,
-      city: user.city,
-      avatar: user.avatar,
-    };
 
     return NextResponse.json(
       {
         message: 'Login successful',
         token,
-        user: userResponse,
+        user: {
+          _id:    user._id,
+          name:   user.name,
+          email:  user.email,
+          role:   user.role,
+          phone:  user.phone,
+          state:  user.state,
+          city:   user.city,
+          avatar: user.avatar,
+        },
       },
       { status: 200 }
     );
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { message: 'Login failed', error: error.message },
+      { message: 'Login failed. Please try again.' },
       { status: 500 }
     );
   }
